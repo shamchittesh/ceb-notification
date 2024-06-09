@@ -32,6 +32,7 @@ def get_outage_data(district, locality):
 def outage_message(latest_date: str):
     date = latest_date["date"]
     locality = latest_date["locality"]
+    streets = latest_date["streets"]
     from_time = datetime.strptime(latest_date["from"], "%Y-%m-%dT%H:%M:%S.%fZ")
     to_time = datetime.strptime(latest_date["to"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
@@ -44,11 +45,9 @@ def outage_message(latest_date: str):
     *Power Outage Alert*: {date}
     \n
     Locality: {locality}
-    \n
+    Streets: {streets}
     From: {from_time.strftime('%A %w, %Y at %-I:%M %p')}
-    \n
     To: {to_time.strftime('%A %w, %Y at %-I:%M %p')}
-    \n
     Outage Duration: {duration} hours
     """
 
