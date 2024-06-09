@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Checkout this repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@main
 
       - name: Fetch file from another repository
         run: |
