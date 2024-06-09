@@ -25,5 +25,3 @@ jobs:
           git add fetched_files/power-outages.json
           git commit -m 'Fetch file from target repository'
           git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
