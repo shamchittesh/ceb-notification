@@ -25,10 +25,10 @@ jobs:
                 python -m pip install --upgrade pip
                 pip install -r requirements.txt
               env:
-                DISTRICT: rivieredurempart
-                LOCALITY: amaury
-                BOT_TOKEN: 7435895619:AAGGDA7YnU0OWDaCFOol59dKfi__x_o1F-U
-                CHAT_ID: -287585545
+                DISTRICT: ${{secrets.DISTRICT}}
+                LOCALITY: ${{secrets.LOCALITY}}
+                BOT_TOKEN: ${{secrets.BOT_TOKEN}}
+                CHAT_ID: ${{secrets.CHAT_ID}}
 
             - name: Run notify.py
               run: python notify.py
