@@ -1,0 +1,32 @@
+name: Run Notify Script
+
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    run-script:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
+
+            - name: Set up Python
+              uses: actions/setup-python@v2
+              with:
+                python-version: '3.x'
+
+            - name: Install dependencies
+              run: |
+                python -m pip install --upgrade pip
+                pip install -r requirements.txt
+              env:
+                DISTRICT: rivieredurempart
+                LOCALITY: amaury
+                BOT_TOKEN: 7435895619:AAGGDA7YnU0OWDaCFOol59dKfi__x_o1F-U
+                CHAT_ID: -287585545
+
+            - name: Run notify.py
+              run: python notify.py
