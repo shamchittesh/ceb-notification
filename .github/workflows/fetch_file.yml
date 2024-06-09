@@ -2,7 +2,7 @@ name: Fetch File from Another Repo
 
 on:
   schedule:
-    - cron: '0 0 * * *' # This cron expression runs the workflow every day at midnight
+    - cron: "10 6-18 * * *" # “At minute 0 past every hour from 6 through 18.”
   workflow_dispatch: # Allows the workflow to be manually triggered
 
 jobs:
