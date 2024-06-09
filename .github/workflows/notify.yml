@@ -25,8 +25,8 @@ jobs:
                 python -m pip install --upgrade pip
                 pip install -r requirements.txt
               env:
-                DISTRICT: ${{secrets.DISTRICT}}
-                LOCALITY: ${{secrets.LOCALITY}}
+                DISTRICT: ${{env.DISTRICT}}
+                LOCALITY: ${{env.LOCALITY}}
                 BOT_TOKEN: ${{secrets.BOT_TOKEN}}
                 CHAT_ID: ${{secrets.CHAT_ID}}
 
