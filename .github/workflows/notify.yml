@@ -18,8 +18,8 @@ jobs:
             # print env variables and secrets
             - name: Print env variables and secrets
               run: |
-                echo "${{env.DISTRICT}}"
-                echo "${{env.LOCALITY}}"
+                echo "${{vars.DISTRICT}}"
+                echo "${{vars.LOCALITY}}"
                 echo "${{secrets.BOT_TOKEN}}"
                 echo "${{secrets.CHAT_ID}}"
 
