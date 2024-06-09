@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout this repository
         uses: actions/checkout@main
+        with:
+            token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Fetch file from another repository
         run: |
