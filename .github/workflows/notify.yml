@@ -15,6 +15,14 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v2
 
+            # print env variables and secrets
+            - name: Print env variables and secrets
+              run: |
+                echo $DISTRICT
+                echo $LOCALITY
+                echo $BOT_TOKEN
+                echo $CHAT_ID
+
             - name: Set up Python
               uses: actions/setup-python@v2
               with:
