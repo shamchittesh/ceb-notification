@@ -20,10 +20,14 @@ def get_outage_data(district, locality):
     data = pd.read_json("./fetched_files/power-outages.json", orient="index")
     district_data = data.loc[district].to_frame()
     district_data = district_data.dropna()
-    latest_date = district_data.iloc[-1][district]
     locality_present = str(locality) in str(district_data.values).lower()
 
     if locality_present:
+        locality_rows = district_data[
+            district_data[district].astype(str).str.contains(locality, case=False)
+        ]
+        latest_date = locality_rows.iloc[-1][district]
+
         return latest_date
     else:
         return None
@@ -42,12 +46,11 @@ def outage_message(latest_date: str):
         duration = int((from_time - to_time).seconds / 60 / 60)
 
     message = f"""
-    *Power Outage Alert*: {date}
-    \n
+    *Power Outage Alert*:
+    {date}
+
     Locality: {locality}
     Streets: {streets}
-    From: {from_time.strftime('%A %w, %Y at %-I:%M %p')}
-    To: {to_time.strftime('%A %w, %Y at %-I:%M %p')}
     Outage Duration: {duration} hours
     """
 
@@ -85,7 +88,10 @@ def main():
         logging.info("No Outage Data Found")
         return
 
-    if notify(latest_date):
+    notify_result = notify(latest_date)
+    notify_result = True
+
+    if notify_result:
         logging.info("Notifying Outage")
         message = outage_message(latest_date)
 
