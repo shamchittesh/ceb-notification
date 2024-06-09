@@ -89,7 +89,6 @@ def main():
         return
 
     notify_result = notify(latest_date)
-    notify_result = True
 
     if notify_result:
         logging.info("Notifying Outage")
