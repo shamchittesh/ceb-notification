@@ -18,10 +18,10 @@ jobs:
             # print env variables and secrets
             - name: Print env variables and secrets
               run: |
-                echo $DISTRICT
-                echo $LOCALITY
-                echo $BOT_TOKEN
-                echo $CHAT_ID
+                echo ${{env.DISTRICT}}
+                echo ${{env.LOCALITY}}
+                echo ${{secrets.BOT_TOKEN}}
+                echo ${{secrets.CHAT_ID}}
 
             - name: Set up Python
               uses: actions/setup-python@v2
