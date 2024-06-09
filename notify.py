@@ -1,0 +1,99 @@
+import requests
+from datetime import datetime
+import os
+import pandas as pd
+import logging
+from dotenv import load_dotenv
+
+load_dotenv()
+
+logging.basicConfig(format="%(asctime)s %(message)s", level=logging.INFO)
+
+district = os.getenv("DISTRICT")
+locality = os.getenv("LOCALITY")
+bot_token = os.getenv("BOT_TOKEN")
+bot_chatID = os.getenv("CHAT_ID")
+
+
+def get_outage_data(district, locality):
+
+    data = pd.read_json("./fetched_files/power-outages.json", orient="index")
+    district_data = data.loc[district].to_frame()
+    district_data = district_data.dropna()
+    latest_date = district_data.iloc[-1][district]
+    locality_present = str(locality) in str(district_data.values).lower()
+
+    if locality_present:
+        return latest_date
+    else:
+        return None
+
+
+def outage_message(latest_date: str):
+    date = latest_date["date"]
+    locality = latest_date["locality"]
+    from_time = datetime.strptime(latest_date["from"], "%Y-%m-%dT%H:%M:%S.%fZ")
+    to_time = datetime.strptime(latest_date["to"], "%Y-%m-%dT%H:%M:%S.%fZ")
+
+    if from_time <= to_time:
+        duration = int((to_time - from_time).seconds / 60 / 60)
+    else:
+        duration = int((from_time - to_time).seconds / 60 / 60)
+
+    message = f"""
+    *Power Outage Alert*: {date}
+    \n
+    Locality: {locality}
+    \n
+    From: {from_time.strftime('%A %w, %Y at %-I:%M %p')}
+    \n
+    To: {to_time.strftime('%A %w, %Y at %-I:%M %p')}
+    \n
+    Outage Duration: {duration} hours
+    """
+
+    return message
+
+
+def send_telegram_message(bot_message: str, bot_token: str, bot_chatID: str):
+
+    send_text: str = (
+        f"https://api.telegram.org/bot{bot_token}/sendMessage?chat_id={bot_chatID}&parse_mode=Markdown&text={bot_message}"
+    )
+    logging.info("Bot: Message Sent to Telegram")
+
+    response = requests.get(send_text)
+
+    return response
+
+
+def notify(latest_date):
+
+    from_time = datetime.strptime(latest_date["from"], "%Y-%m-%dT%H:%M:%S.%fZ")
+    to_time = datetime.strptime(latest_date["to"], "%Y-%m-%dT%H:%M:%S.%fZ")
+
+    if (from_time >= datetime.now()) or (to_time >= datetime.now()):
+        return True
+    else:
+        logging.info("Outage data is outdated")
+        return False
+
+
+def main():
+    latest_date = get_outage_data(district, locality)
+
+    if latest_date is None:
+        logging.info("No Outage Data Found")
+        return
+
+    if notify(latest_date):
+        logging.info("Notifying Outage")
+        message = outage_message(latest_date)
+
+        response = send_telegram_message(message, bot_token, bot_chatID)
+
+        logging.info(response.json())
+
+
+if __name__ == "__main__":
+    main()
