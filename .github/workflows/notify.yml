@@ -6,6 +6,11 @@ on:
             - main
     workflow_dispatch: # Allows the workflow to be manually triggered
 
+env:
+    DISTRICT: ${{vars.DISTRICT}}
+    LOCALITY: ${{vars.LOCALITY}}
+    BOT_TOKEN: ${{secrets.BOT_TOKEN}}
+    CHAT_ID: ${{secrets.CHAT_ID}}
 
 jobs:
     run-script:
@@ -14,6 +19,14 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@v2
+
+            # print env variables and secrets
+            - name: Print env variables and secrets
+              run: |
+                echo "$DISTRICT"
+                echo "$LOCALITY"
+                echo "$BOT_TOKEN"
+                echo "$CHAT_ID"
 
             - name: Set up Python
               uses: actions/setup-python@v2
@@ -24,11 +37,6 @@ jobs:
               run: |
                 python -m pip install --upgrade pip
                 pip install -r requirements.txt
-              env:
-                DISTRICT: ${{vars.DISTRICT}}
-                LOCALITY: ${{vars.LOCALITY}}
-                BOT_TOKEN: ${{secrets.BOT_TOKEN}}
-                CHAT_ID: ${{secrets.CHAT_ID}}
 
             - name: Run notify.py
               run: python notify.py
