@@ -2,6 +2,7 @@ import requests
 from datetime import datetime
 import os
 import pandas as pd
+import polars as pl
 import logging
 from dotenv import load_dotenv
 
@@ -15,30 +16,45 @@ bot_token = os.getenv("BOT_TOKEN")
 bot_chatID = os.getenv("CHAT_ID")
 
 
-def get_outage_data(district, locality):
+data_path = "./fetched_files/power-outages.json"
 
-    data = pd.read_json("./fetched_files/power-outages.json", orient="index")
-    district_data = data.loc[district].to_frame()
-    district_data = district_data.dropna()
-    locality_present = str(locality) in str(district_data.values).lower()
 
-    if locality_present:
-        locality_rows = district_data[
-            district_data[district].astype(str).str.contains(locality, case=False)
-        ]
-        latest_date = locality_rows.iloc[-1][district]
+def get_outage_data(district, locality, file_path):
 
-        return latest_date
-    else:
-        return None
+    data = pl.scan_ndjson(data_path)
+    district_data = (
+        data.select(
+            district
+        )
+        .collect()
+        .item()
+        .to_list()
+    )
+    df = pl.from_dicts(district_data).lazy()
+    df = (
+        df.filter(
+            pl.col("locality")
+            .str.to_lowercase()
+            .str.contains(locality.lower())
+        )
+    )
+    df = (
+        df.with_columns(
+            pl.col("from").cast(pl.Datetime),
+            pl.col("to").cast(pl.Datetime),
+        )
+        .sort("from", descending=True)
+        .head(1)
+    )
+    return df
 
 
 def outage_message(latest_date: str):
     date = latest_date["date"]
     locality = latest_date["locality"]
     streets = latest_date["streets"]
-    from_time = datetime.strptime(latest_date["from"], "%Y-%m-%dT%H:%M:%S.%fZ")
-    to_time = datetime.strptime(latest_date["to"], "%Y-%m-%dT%H:%M:%S.%fZ")
+    from_time = latest_date["from"]
+    to_time = latest_date["to"]
 
     if from_time <= to_time:
         duration = int((to_time - from_time).seconds / 60 / 60)
@@ -71,8 +87,8 @@ def send_telegram_message(bot_message: str, bot_token: str, bot_chatID: str):
 
 def notify(latest_date):
 
-    from_time = datetime.strptime(latest_date["from"], "%Y-%m-%dT%H:%M:%S.%fZ")
-    to_time = datetime.strptime(latest_date["to"], "%Y-%m-%dT%H:%M:%S.%fZ")
+    from_time = latest_date["from"]
+    to_time = latest_date["to"]
 
     if (from_time >= datetime.now()) or (to_time >= datetime.now()):
         return True
@@ -82,7 +98,8 @@ def notify(latest_date):
 
 
 def main():
-    latest_date = get_outage_data(district, locality)
+    latest_date = get_outage_data(district, locality, data_path)
+    latest_date = latest_date.collect().to_dicts()[0]
 
     if latest_date is None:
         logging.info("No Outage Data Found")
