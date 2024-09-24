@@ -1,7 +1,6 @@
 import requests
 from datetime import datetime
 import os
-import pandas as pd
 import polars as pl
 import logging
 from dotenv import load_dotenv
