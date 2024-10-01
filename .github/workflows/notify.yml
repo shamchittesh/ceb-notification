@@ -1,10 +1,9 @@
 name: Run Notify Script
 
 on:
-    push:
-        branches:
-            - main
-    workflow_dispatch: # Allows the workflow to be manually triggered
+  schedule:
+    - cron: "12 6-18 * * *" # “At minute 12 past every hour from 6 through 18.”
+  workflow_dispatch: # Allows the workflow to be manually triggered
 
 env:
     DISTRICT: ${{vars.DISTRICT}}
